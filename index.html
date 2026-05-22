@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>நெத்தியடி ஜோதிடம்</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tiro+Tamil:ital@0;1&family=Philosopher:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --saffron:       #E8871A;
+      --saffron-light: #F5A947;
+      --saffron-pale:  #FDF0DC;
+      --gold:          #C9900C;
+      --gold-light:    #F0C040;
+      --deep-red:      #8B1A1A;
+      --maroon:        #5C1010;
+      --cream:         #FBF5E6;
+      --parchment:     #F2E8D0;
+      --ink:           #2A1A06;
+      --ink-mid:       #4A3010;
+      --ink-soft:      #7A5C30;
+      --lotus-pink:    #D4607A;
+      --sky-blue:      #4A7FA5;
+      --leaf-green:    #5A8A4A;
+      --border:        #D4A84B;
+      --shadow:        rgba(139,90,30,0.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Tiro Tamil', Georgia, serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.75;
+      min-height: 100vh;
+    }
+
+    /* ── STAR/KOLAM BACKGROUND ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(232,135,26,.06) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(201,144,12,.08) 0%, transparent 50%),
+        radial-gradient(circle at 60% 10%, rgba(212,96,122,.05) 0%, transparent 40%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── DECORATIVE BORDER PATTERN ── */
+    .border-strip {
+      height: 6px;
+      background: repeating-linear-gradient(
+        90deg,
+        var(--saffron) 0px, var(--saffron) 12px,
+        var(--gold-light) 12px, var(--gold-light) 18px,
+        var(--deep-red) 18px, var(--deep-red) 30px,
+        var(--gold-light) 30px, var(--gold-light) 36px
+      );
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--maroon);
+      box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+    }
+    .nav-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 60px;
+    }
+    .nav-brand {
+      font-family: 'Philosopher', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: .04em;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-brand .om { font-size: 1.6rem; line-height: 1; }
+    .nav-links { display: flex; gap: 8px; }
+    .nav-links a {
+      color: var(--parchment);
+      text-decoration: none;
+      font-size: .97rem;
+      padding: 6px 18px;
+      border-radius: 20px;
+      transition: background .2s, color .2s;
+      font-family: 'Tiro Tamil', serif;
+    }
+    .nav-links a:hover,
+    .nav-links a.active {
+      background: var(--saffron);
+      color: #fff;
+    }
+
+    /* ── PAGES ── */
+    .page { display: none; animation: fadeIn .4s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 64px 24px 48px;
+      background: linear-gradient(160deg, var(--parchment) 0%, var(--saffron-pale) 60%, #fff8ef 100%);
+      border-bottom: 3px solid var(--border);
+      overflow: hidden;
+    }
+    .hero-planets {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .planet {
+      position: absolute;
+      border-radius: 50%;
+      opacity: .13;
+      animation: drift 18s ease-in-out infinite alternate;
+    }
+    .planet:nth-child(1) { width:120px; height:120px; background:var(--saffron);    top:10%;  left:8%;  animation-duration:16s; }
+    .planet:nth-child(2) { width: 70px; height: 70px;  background:var(--sky-blue);   top:60%;  left:5%;  animation-duration:21s; }
+    .planet:nth-child(3) { width: 90px; height: 90px;  background:var(--deep-red);   top:15%;  right:6%; animation-duration:14s; }
+    .planet:nth-child(4) { width: 50px; height: 50px;  background:var(--gold);       bottom:20%;right:10%;animation-duration:19s;}
+    .planet:nth-child(5) { width: 40px; height: 40px;  background:var(--lotus-pink); bottom:10%;left:20%; animation-duration:23s; }
+    @keyframes drift { from { transform: translateY(0) scale(1); } to { transform: translateY(-20px) scale(1.05); } }
+
+    .hero-om {
+      font-size: 3.5rem;
+      color: var(--saffron);
+      line-height: 1;
+      margin-bottom: 12px;
+      text-shadow: 0 2px 8px rgba(232,135,26,.3);
+      animation: pulse 3s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.05);} }
+
+    .hero h1 {
+      font-family: 'Philosopher', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      color: var(--maroon);
+      letter-spacing: .03em;
+      margin-bottom: 8px;
+    }
+    .hero-subtitle {
+      font-size: 1.05rem;
+      color: var(--ink-soft);
+      max-width: 560px;
+      margin: 0 auto 20px;
+    }
+    .navagraha-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+    .graha-chip {
+      background: var(--maroon);
+      color: var(--gold-light);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: .85rem;
+      letter-spacing: .05em;
+      font-family: 'Tiro Tamil', serif;
+      border: 1px solid rgba(201,144,12,.3);
+      transition: background .2s, transform .15s;
+    }
+    .graha-chip:hover { background: var(--saffron); color: #fff; transform: translateY(-2px); }
+
+    /* ── MAIN CONTENT ── */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    .section-title {
+      font-family: 'Philosopher', serif;
+      font-size: 1.5rem;
+      color: var(--maroon);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, var(--border), transparent);
+      border-radius: 2px;
+    }
+    .section-desc {
+      color: var(--ink-soft);
+      font-size: .95rem;
+      margin-bottom: 32px;
+    }
+
+    /* ── FAQ ── */
+    .faq-list { display: flex; flex-direction: column; gap: 14px; }
+
+    .faq-item {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px var(--shadow);
+      transition: box-shadow .2s;
+    }
+    .faq-item:hover { box-shadow: 0 4px 20px var(--shadow); }
+
+    .faq-q {
+      width: 100%;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px 20px;
+      text-align: left;
+      font-family: 'Tiro Tamil', serif;
+      font-size: 1.02rem;
+      color: var(--ink);
+      font-weight: 600;
+      line-height: 1.5;
+    }
+    .faq-q:hover { background: var(--saffron-pale); }
+    .faq-q .icon {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      background: var(--saffron);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .8rem;
+      font-weight: 700;
+      margin-top: 1px;
+      transition: background .2s;
+    }
+    .faq-item.open .faq-q .icon { background: var(--maroon); }
+    .faq-arrow {
+      margin-left: auto;
+      flex-shrink: 0;
+      font-size: 1.1rem;
+      color: var(--saffron);
+      transition: transform .3s;
+      padding-top: 2px;
+    }
+    .faq-item.open .faq-arrow { transform: rotate(180deg); }
+
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .38s cubic-bezier(.4,0,.2,1);
+    }
+    .faq-item.open .faq-a { max-height: 400px; }
+    .faq-a-inner {
+      padding: 0 20px 20px 62px;
+      font-size: .97rem;
+      color: var(--ink-mid);
+      line-height: 1.85;
+      border-top: 1px solid var(--parchment);
+      padding-top: 14px;
+    }
+
+    /* ── ABOUT US ── */
+    .about-hero {
+      text-align: center;
+      padding: 56px 24px 36px;
+      background: linear-gradient(160deg, var(--parchment) 0%, var(--saffron-pale) 100%);
+      border-bottom: 3px solid var(--border);
+    }
+    .about-hero .big-om {
+      font-size: 5rem;
+      color: var(--saffron);
+      line-height: 1;
+      margin-bottom: 10px;
+      text-shadow: 0 4px 16px rgba(232,135,26,.25);
+    }
+    .about-hero h2 {
+      font-family: 'Philosopher', serif;
+      font-size: 2rem;
+      color: var(--maroon);
+      margin-bottom: 8px;
+    }
+    .about-hero p { color: var(--ink-soft); max-width: 520px; margin: 0 auto; }
+
+    .about-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+    .about-card {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 20px;
+      box-shadow: 0 2px 12px var(--shadow);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .about-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px var(--shadow); }
+    .about-card .card-icon { font-size: 2rem; margin-bottom: 10px; }
+    .about-card h3 {
+      font-family: 'Philosopher', serif;
+      font-size: 1.05rem;
+      color: var(--maroon);
+      margin-bottom: 6px;
+    }
+    .about-card p { font-size: .92rem; color: var(--ink-mid); line-height: 1.7; }
+
+    .about-quote {
+      background: var(--maroon);
+      color: var(--gold-light);
+      border-radius: 12px;
+      padding: 28px 32px;
+      text-align: center;
+      font-size: 1.1rem;
+      line-height: 2;
+      font-family: 'Tiro Tamil', serif;
+      position: relative;
+      margin-bottom: 36px;
+    }
+    .about-quote::before {
+      content: '❝';
+      font-size: 3rem;
+      color: var(--saffron);
+      opacity: .5;
+      position: absolute;
+      top: 8px;
+      left: 18px;
+      line-height: 1;
+    }
+    .about-quote .source {
+      display: block;
+      margin-top: 10px;
+      font-size: .88rem;
+      color: var(--saffron-light);
+      font-style: italic;
+    }
+
+    .planets-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .93rem;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px var(--shadow);
+      border: 1.5px solid var(--border);
+    }
+    .planets-table th {
+      background: var(--maroon);
+      color: var(--gold-light);
+      padding: 12px 16px;
+      text-align: left;
+      font-family: 'Philosopher', serif;
+      font-weight: 600;
+      font-size: .95rem;
+    }
+    .planets-table td {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--parchment);
+      color: var(--ink-mid);
+    }
+    .planets-table tr:last-child td { border-bottom: none; }
+    .planets-table tr:hover td { background: var(--saffron-pale); }
+    .planets-table .dot {
+      display: inline-block;
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      background: var(--maroon);
+      color: var(--parchment);
+      text-align: center;
+      padding: 20px 24px;
+      font-size: .88rem;
+      border-top: 4px solid var(--saffron);
+    }
+    footer span { color: var(--gold-light); }
+
+    /* ── YOUTUBE BUTTON ── */
+    .yt-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 14px;
+      padding: 7px 16px;
+      background: #FF0000;
+      color: #fff;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: .85rem;
+      font-family: 'Philosopher', serif;
+      font-weight: 700;
+      letter-spacing: .03em;
+      transition: background .2s, transform .15s, box-shadow .2s;
+      box-shadow: 0 2px 8px rgba(255,0,0,.25);
+    }
+    .yt-btn:hover {
+      background: #cc0000;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px rgba(255,0,0,.35);
+    }
+    .yt-btn svg {
+      flex-shrink: 0;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .nav-brand { font-size: 1rem; }
+      .hero { padding: 44px 16px 36px; }
+      main { padding: 32px 14px 60px; }
+      .faq-a-inner { padding-left: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="border-strip"></div>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-brand" href="#" onclick="showPage('home')">
+      <span class="om"></span> நெத்தியடி ஜோதிடம்
+    </a>
+    <div class="nav-links">
+      <a href="#" id="nav-home" class="active" onclick="showPage('home')">முகப்பு</a>
+      <a href="#" id="nav-about" onclick="showPage('about')">எங்களை பற்றி</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════ HOME PAGE ══════════ -->
+<div class="page active" id="page-home">
+
+  <div class="hero">
+    <div class="hero-planets">
+      <div class="planet"></div><div class="planet"></div><div class="planet"></div>
+      <div class="planet"></div><div class="planet"></div>
+    </div>
+    <div class="hero-om">ௐ</div>
+    <h1>நெத்தியடி ஜோதிடம் </h1>
+    <p class="hero-subtitle">கொடிக்கம்பம் ஜோதிடர் SPS</p>
+    <div class="navagraha-row">
+
+    </div>
+  </div>
+
+  <main>
+    <h2 class="section-title">✦ அனுபவ ஜோதிட விதி</h2>
+    <p class="section-desc">கீழே உள்ள கேள்விகளை சொடுக்கி விடையைப் படிக்கலாம்.</p>
+
+    <div class="faq-list" id="faq-list">
+      <!-- FAQs injected by JS -->
+    </div>
+  </main>
+</div>
+
+<!-- ══════════ ABOUT PAGE ══════════ -->
+<div class="page" id="page-about">
+
+
+
+  <main>
+
+    <div class="about-quote">
+      "விண்ணிலே தெரியும் நட்சத்திரங்கள் மண்ணிலே வாழும் மனிதர்களின் விதியை தீர்மானிக்கின்றன என்பது தமிழர்களின் ஆழமான நம்பிக்கை."
+      <span class="source">— தமிழ் ஜோதிட மரபு</span>
+    </div>
+
+    <h2 class="section-title" style="margin-bottom:20px;">✦ நாங்கள் யார்?</h2>
+    <div class="about-cards">
+      <div class="about-card">
+        <div class="card-icon">📜</div>
+        <h3>பழமையான மரபு</h3>
+        <p>தமிழ் ஜோதிடம் ஆயிரக்கணக்கான ஆண்டுகளாக வழிவழியாக வந்த ஒரு புனிதமான அறிவியல். அகத்தியர், போகர் போன்ற சித்தர்களின் ஞானம் இதில் உள்ளது.</p>
+      </div>
+      <div class="about-card">
+        <div class="card-icon">🌸</div>
+        <h3>எளிய மொழியில்</h3>
+        <p>சிக்கலான ஜோதிட கணக்குகளை எளிய தமிழில் விளக்கி, சாமானிய மக்களுக்கும் புரியும்படி தெரிவிக்கிறோம்.</p>
+      </div>
+      <div class="about-card">
+        <div class="card-icon">🪔</div>
+        <h3>பரிகார வழிகாட்டி</h3>
+        <p>கிரக தோஷங்களுக்கான பரிகாரங்கள், விரத நாட்கள், கோவில் தரிசனங்கள் பற்றிய வழிகாட்டுதல் வழங்குகிறோம்.</p>
+      </div>
+    </div>
+ 
+  </main>
+</div>
+
+<footer>
+  <span></span> நெத்தியடி ஜோதிடம் &nbsp;|&nbsp;
+  <span>&copy;அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை</span>
+</footer>
+
+<script>
+  // ── PAGE SWITCH ──
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    document.getElementById('nav-' + name).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return false;
+  }
+
+  // ── YouTube SVG logo ──
+  const ytLogo = `<svg width="20" height="14" viewBox="0 0 20 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="20" height="14" rx="3" fill="white" fill-opacity="0.25"/>
+    <path d="M8 10L13.5 7L8 4V10Z" fill="white"/>
+  </svg>`;
+
+  // ── FAQ DATA ──
+  // Replace the yt: URL with your actual YouTube video link for each FAQ.
+  // Set yt: null to hide the button for that FAQ.
+  const faqs = [
+    {
+      q: "உங்கள் ஜாதகப்படி உங்கள் குழந்தை அதிர்ஷ்டமான குழந்தையா? 001",
+      a: "5-ம் அதிபதி உச்சம் பெற்று, மறையாமல், அந்த 5-ம் அதிபதியின் நட்சத்திரத்தில் குழந்தை பிறந்தால் அது அதிர்ஷ்டமான குழந்தை. குழந்தை பிறந்த பின்பு தொழில் மேன்மை, பொருளாதார உயர்வு, உத்தியோக மேன்மை, சமூக அந்தஸ்து, சொத்துக்கள் சேர்க்கை என்று படிப்படியாக முன்னேற்றத்தை, உயர்வை உறுதியாக அடைந்து தீருவீர்கள். 5-ம் அதிபதி லக்னத்துக்கும், லக்னாதிபதிக்கும், குரு மறையாமல் இருந்தால் உறுதியாக அதிர்ஷ்டமான குழந்தை பிறந்தே தீரும்..<br>",
+      yt: "https://youtu.be/HDlxDU6Y6v4?si=_u-msaWZ0RIX-Q-Y"
+    },
+    {
+      q: "கெத்து காட்டும் ஒத்த வாரிசு ? 407",
+      a: "5-ம் வீட்டை 5-ம் அதிபதி பார்த்தாலும் அல்லது 5-ம் வீட்டை லக்னாதிபதி பார்த்தாலும், ஒரே குழந்தை பிறக்கும். ஆயுளோடும், அறிவோடும், ஆற்றலோடும் இருந்து கெத்து காட்டும். குறிப்பாக, 5-ம் வீட்டில் குரு ஆட்சி பெற்று, அவர் லக்னாதிபதியை பார்த்தாலும், அவர்களுக்கு கெத்து காட்டும் ஒற்றை வாரிசு பிறக்கும். அது கொடிகட்டி பறக்கும். இது அனுபவத்தில் உணர்ந்து பயன்படுத்தும் அற்புத விதி.<br>.",
+      yt: "https://youtube.com/shorts/nK2_t0XTskI?si=DL3IzSOxHKZE0p0K"
+    },
+    {
+      q: "ஜாதகம் பார்க்க என்ன தகவல்கள் தேவை?",
+      a: "ஜாதகம் தயாரிக்க மூன்று முக்கியமான தகவல்கள் தேவை: (1) பிறந்த தேதி (Date of Birth), (2) பிறந்த நேரம் (Time of Birth) — இது சரியாக இருக்க வேண்டியது மிக அவசியம், (3) பிறந்த இடம் (Place of Birth). இந்த மூன்று தகவல்களும் சரியாக இருந்தால் மட்டுமே துல்லியமான ஜாதகம் தயாரிக்க முடியும்.",
+      yt: "https://www.youtube.com/results?search_query=jathagam+tamil+how+to+read"
+    },
+    {
+      q: "ராசி என்றால் என்ன? எத்தனை ராசிகள் உள்ளன?",
+      a: "ராசி என்பது வானத்தை 12 பகுதிகளாக பிரித்து ஒவ்வொரு பகுதிக்கும் கொடுக்கப்பட்ட பெயர். மொத்தம் 12 ராசிகள் உள்ளன: மேஷம், ரிஷபம், மிதுனம், கடகம், சிம்மம், கன்னி, துலாம், விருச்சிகம், தனுசு, மகரம், கும்பம், மீனம். ஒருவர் பிறக்கும் போது சந்திரன் எந்த ராசியில் இருக்கிறதோ அது அவரது ஜன்ம ராசி ஆகும்.",
+      yt: "https://www.youtube.com/results?search_query=12+rasi+tamil+astrology+explained"
+    },
+    {
+      q: "நட்சத்திரம் என்றால் என்ன? அது ராசியிலிருந்து எவ்வாறு வேறுபடுகிறது?",
+      a: "வானவெளியை 27 சம பகுதிகளாக பிரித்து அவற்றுக்கு அஸ்வினி, பரணி, கார்த்திகை என்று நட்சத்திர பெயர்கள் கொடுக்கப்பட்டுள்ளன. ஒருவர் பிறக்கும் போது சந்திரன் எந்த நட்சத்திரத்தில் இருக்கிறதோ அது அவரது ஜன்ம நட்சத்திரம். ராசி என்பது 12 பிரிவுகள் கொண்டது; நட்சத்திரம் என்பது 27 பிரிவுகள் கொண்டது. ஒவ்வொரு ராசியிலும் 2 முதல் 2.5 நட்சத்திரங்கள் இருக்கும்.",
+      yt: "https://www.youtube.com/results?search_query=27+natchathiram+tamil+astrology"
+    },
+    {
+      q: "தசா-புக்தி என்றால் என்ன?",
+      a: "தசா என்பது ஒருவரின் வாழ்க்கையில் ஒவ்வொரு கிரகமும் ஆட்சி செலுத்தும் ஒரு குறிப்பிட்ட காலகட்டம். 120 ஆண்டு சுழற்சியில் ஒன்பது கிரகங்களும் முறையே ஆட்சி செலுத்தும். அந்த பெரிய காலகட்டம் தசா; அதற்குள் உள்ள சிறிய பிரிவுகள் புக்தி. ஒருவரின் வாழ்க்கையில் எந்த கிரகத்தின் தசா நடக்கிறதோ அதற்கேற்ப நன்மையோ தீமையோ அனுபவிப்பார் என்று நம்பப்படுகிறது.",
+      yt: "https://www.youtube.com/results?search_query=dasa+bukthi+tamil+astrology"
+    },
+    {
+      q: "சனி தோஷம் (ஏழரை சனி) என்றால் என்ன? அதற்கு என்ன பரிகாரம்?",
+      a: "சனி தன் சஞ்சாரத்தில் ஒருவரின் ஜன்ம ராசிக்கு 12-ல், ஜன்ம ராசியில், மற்றும் ஜன்ம ராசிக்கு 2-ல் (மொத்தம் 7.5 ஆண்டுகள்) செல்வதை ஏழரை சனி என்பர். இது சவால்கரமான காலம் என்று கூறப்படுகிறது. பரிகாரமாக: சனிக்கிழமை திருநள்ளாறு சனீஸ்வரர் கோவிலில் வழிபடுவது, நல்லெண்ணெய் தீபம் ஏற்றுவது, ஏழை மக்களுக்கு உணவு தானம் செய்வது பயனளிக்கும் என்று சொல்லப்படுகிறது.",
+      yt: "https://www.youtube.com/results?search_query=ezharai+sani+tamil+pariharam"
+    },
+    {
+      q: "ராகு-கேது தோஷம் என்றால் என்ன?",
+      a: "ராகு-கேது என்பது வான்வெளியில் நிஜமான கிரகங்கள் அல்ல; அவை சூரிய-சந்திர பாதைகளின் குறுக்கு வெட்டு புள்ளிகள் (Shadow planets). ஜாதகத்தில் இவை சாதகமற்ற இடங்களில் இருந்தால் 'ராகு-கேது தோஷம்' என்று கூறப்படுகிறது. பரிகாரமாக திருக்காளத்தி, காளஹஸ்தி, திருநாகேஸ்வரம் போன்ற கோவில்களில் வழிபடுவது நல்லது என்று ஜோதிடர்கள் கூறுகின்றனர்.",
+      yt: "https://www.youtube.com/results?search_query=rahu+ketu+dosham+tamil+pariharam"
+    },
+    {
+      q: "திருமண பொருத்தம் பார்ப்பது எவ்வாறு?",
+      a: "தமிழ் மரபில் திருமண பொருத்தம் பார்க்க 'பத்துப் பொருத்தம்' என்னும் முறை பயன்படுகிறது: திநம், கணம், மகேந்திரம், ஸ்திரீ தீர்க்கம், யோனி, ராசி, ராசியதிபதி, வசியம், ரஜ்ஜு, வேதை ஆகியவை. இவற்றில் குறைந்தது 5 முதல் 6 பொருத்தங்களாவது இருந்தால் மணம் சிறக்கும் என்று கூறப்படுகிறது. ரஜ்ஜு பொருத்தம் மிகவும் முக்கியமானது.",
+      yt: "https://www.youtube.com/results?search_query=tamil+marriage+porutham+10+porutham"
+    },
+    {
+      q: "கிரக தோஷங்களுக்கு பொதுவான பரிகாரங்கள் என்னென்ன?",
+      a: "கிரக தோஷங்களுக்கு பொதுவான பரிகாரங்கள்: நவகிரக ஸ்தல தரிசனம் (சூரியனார் கோவில் போன்றவை), நவகிரக ஹோமம், தானம் (ஒவ்வொரு கிரகத்துக்கும் உரிய பொருட்களை தானம் செய்வது), நவகிரக தினங்களில் விரதம் இருப்பது, மந்திர ஜபம் (ஒவ்வொரு கிரகத்துக்கும் உரிய மந்திரம்). இவற்றை தகுந்த ஜோதிடரின் வழிகாட்டுதலின் படி செய்வது நல்லது.",
+      yt: "https://www.youtube.com/results?search_query=graha+dosham+pariharam+tamil"
+    }
+  ];
+
+  // ── RENDER FAQ ──
+  const list = document.getElementById('faq-list');
+  faqs.forEach((item, i) => {
+    const ytBtn = item.yt
+      ? `<a class="yt-btn" href="${item.yt}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${ytLogo} YouTube-ல் காண்க</a>`
+      : '';
+    const el = document.createElement('div');
+    el.className = 'faq-item';
+    el.innerHTML = `
+      <button class="faq-q" onclick="toggleFaq(this)">
+        <span class="icon">${i + 1}</span>
+        <span>${item.q}</span>
+        <span class="faq-arrow">▾</span>
+      </button>
+      <div class="faq-a">
+        <div class="faq-a-inner">${item.a}${ytBtn}</div>
+      </div>`;
+    list.appendChild(el);
+  });
+
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item');
+    const wasOpen = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(x => x.classList.remove('open'));
+    if (!wasOpen) item.classList.add('open');
+  }
+</script>
+
+</body>
+</html>
