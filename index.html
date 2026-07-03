@@ -412,7 +412,7 @@
     }
     footer span { color: var(--gold-light); }
 
-    /* ── YOUTUBE BUTTON ── */
+    /* ── YOUTUBE AUDIO BUTTON ── */
     .yt-btn {
       display: inline-flex;
       align-items: center;
@@ -421,7 +421,9 @@
       padding: 7px 16px;
       background: #FF0000;
       color: #fff;
+      border: none;
       border-radius: 6px;
+      cursor: pointer;
       text-decoration: none;
       font-size: .85rem;
       font-family: 'Philosopher', serif;
@@ -435,9 +437,13 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 14px rgba(255,0,0,.35);
     }
-    .yt-btn svg {
-      flex-shrink: 0;
+    .yt-btn.playing {
+      background: var(--maroon);
+      box-shadow: 0 2px 8px rgba(92,16,16,.35);
     }
+    .yt-btn.playing:hover { background: #4a0d0d; }
+    .yt-btn svg { flex-shrink: 0; }
+    .yt-player-slot { width: 0; height: 0; overflow: hidden; }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
@@ -517,7 +523,7 @@
       <div class="about-card">
         <div class="card-icon">🪔</div>
         <h3>பரிகார வழிகாட்டி</h3>
-        <p>கிரக தோஷங்களுக்கான பரிகாரங்கள், விரத நாட்கள், கோவில் தரிசனங்கள் பற்றிய வழிகாட்டுதல் வழங்குகிறோம்.</p>
+        <p></p>
       </div>
     </div>
  
@@ -528,6 +534,9 @@
   <span></span> நெத்தியடி ஜோதிடம் &nbsp;|&nbsp;
   <span>&copy;<script>document.write(new Date().getFullYear());</script>அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை</span>
 </footer>
+
+<!-- YouTube IFrame API -->
+<script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
   // ── PAGE SWITCH ──
@@ -547,41 +556,44 @@
   </svg>`;
 
   // ── FAQ DATA ──
-  // Replace the yt: URL with your actual YouTube video link for each FAQ.
-  // Set yt: null to hide the button for that FAQ.
+  // Just put the YouTube video ID (the part after youtu.be/ or v=) in ytId.
+  // Set ytId: null to hide the audio button for that FAQ.
   const faqs = [
     {
       q: "உங்கள் ஜாதகப்படி உங்கள் குழந்தை அதிர்ஷ்டமான குழந்தையா? 001",
       a: "5-ம் அதிபதி உச்சம் பெற்று, மறையாமல், அந்த 5-ம் அதிபதியின் நட்சத்திரத்தில் குழந்தை பிறந்தால் அது அதிர்ஷ்டமான குழந்தை. குழந்தை பிறந்த பின்பு தொழில் மேன்மை, பொருளாதார உயர்வு, உத்தியோக மேன்மை, சமூக அந்தஸ்து, சொத்துக்கள் சேர்க்கை என்று படிப்படியாக முன்னேற்றத்தை, உயர்வை உறுதியாக அடைந்தே தீருவீர்கள். 5-ம் அதிபதி லக்னத்துக்கும், லக்னாதிபதிக்கும், குரு மறையாமல் இருந்தால் உறுதியாக அதிர்ஷ்டமான குழந்தை பிறந்தே தீரும்..<br>",
-      yt: "https://youtu.be/HDlxDU6Y6v4?si=_u-msaWZ0RIX-Q-Y"
+      ytId: "HDlxDU6Y6v4"
     },
     {
       q: "கெத்து காட்டும் ஒத்த வாரிசு ? 407",
       a: "5-ம் வீட்டை 5-ம் அதிபதி பார்த்தாலும் அல்லது 5-ம் வீட்டை லக்னாதிபதி பார்த்தாலும், ஒரே குழந்தை பிறக்கும். ஆயுளோடும், அறிவோடும், ஆற்றலோடும் இருந்து கெத்து காட்டும். குறிப்பாக, 5-ம் வீட்டில் குரு ஆட்சி பெற்று, அவர் லக்னாதிபதியை பார்த்தாலும், அவர்களுக்கு கெத்து காட்டும் ஒற்றை வாரிசு பிறக்கும். அது கொடிகட்டி பறக்கும். இது அனுபவத்தில் உணர்ந்து பயன்படுத்தும் அற்புத விதி.<br>.",
-      yt: "https://youtube.com/shorts/nK2_t0XTskI?si=DL3IzSOxHKZE0p0K"
+      ytId: "nK2_t0XTskI"
     },
     {
-      q: "ஜாதகம் பார்க்க என்ன தகவல்கள் தேவை?",
-      a: "ஜாதகம் தயாரிக்க மூன்று முக்கியமான தகவல்கள் தேவை: (1) பிறந்த தேதி (Date of Birth), (2) பிறந்த நேரம் (Time of Birth) — இது சரியாக இருக்க வேண்டியது மிக அவசியம், (3) பிறந்த இடம் (Place of Birth). இந்த மூன்று தகவல்களும் சரியாக இருந்தால் மட்டுமே துல்லியமான ஜாதகம் தயாரிக்க முடியும்.",
-      yt: "https://www.youtube.com/results?search_query=jathagam+tamil+how+to+read"
+      q: "ஜாதகம் ",
+      a: "முடியும்.",
+      ytId: null
     },
     {
-      q: "ராசி என்றால் என்ன? எத்தனை ராசிகள் உள்ளன?",
-      a: "ராசி என்பது வானத்தை 12 பகுதிகளாக பிரித்து ஒவ்வொரு பகுதிக்கும் கொடுக்கப்பட்ட பெயர். மொத்தம் 12 ராசிகள் உள்ளன: மேஷம், ரிஷபம், மிதுனம், கடகம், சிம்மம், கன்னி, துலாம், விருச்சிகம், தனுசு, மகரம், கும்பம், மீனம். ஒருவர் பிறக்கும் போது சந்திரன் எந்த ராசியில் இருக்கிறதோ அது அவரது ஜன்ம ராசி ஆகும்.",
-      yt: "https://www.youtube.com/results?search_query=12+rasi+tamil+astrology+explained"
+      q: "ராசி?",
+      a: "ராசி ",
+      ytId: null
     },
     {
-      q: "கிரக தோஷங்களுக்கு பொதுவான பரிகாரங்கள் என்னென்ன?",
-      a: "கிரக தோஷங்களுக்கு பொதுவான பரிகாரங்கள்: நவகிரக ஸ்தல தரிசனம் (சூரியனார் கோவில் போன்றவை), நவகிரக ஹோமம், தானம் (ஒவ்வொரு கிரகத்துக்கும் உரிய பொருட்களை தானம் செய்வது), நவகிரக தினங்களில் விரதம் இருப்பது, மந்திர ஜபம் (ஒவ்வொரு கிரகத்துக்கும் உரிய மந்திரம்). இவற்றை தகுந்த ஜோதிடரின் வழிகாட்டுதலின் படி செய்வது நல்லது.",
-      yt: "https://www.youtube.com/results?search_query=graha+dosham+pariharam+tamil"
+      q: "ராசி?",
+      a: "ராசி ",
+      ytId: null
     }
   ];
 
   // ── RENDER FAQ ──
   const list = document.getElementById('faq-list');
   faqs.forEach((item, i) => {
-    const ytBtn = item.yt
-      ? `<a class="yt-btn" href="${item.yt}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${ytLogo} YouTube-ல் காண்க</a>`
+    const ytBtn = item.ytId
+      ? `<button class="yt-btn" id="ytbtn-${i}" onclick="event.stopPropagation(); toggleAudio(${i}, '${item.ytId}')">
+           ${ytLogo} <span id="ytlabel-${i}">ஒலியை கேட்க</span>
+         </button>
+         <div class="yt-player-slot" id="ytplayer-${i}"></div>`
       : '';
     const el = document.createElement('div');
     el.className = 'faq-item';
@@ -602,6 +614,93 @@
     const wasOpen = item.classList.contains('open');
     document.querySelectorAll('.faq-item.open').forEach(x => x.classList.remove('open'));
     if (!wasOpen) item.classList.add('open');
+  }
+
+  // ── YOUTUBE AUDIO-ONLY PLAYBACK ──
+  let ytPlayers = {};       // cache of created YT.Player instances, keyed by faq index
+  let ytApiReady = false;
+  let pendingPlay = null;   // {i, videoId} queued until API is ready
+
+  function onYouTubeIframeAPIReady() {
+    ytApiReady = true;
+    if (pendingPlay) {
+      const { i, videoId } = pendingPlay;
+      pendingPlay = null;
+      createAndPlay(i, videoId);
+    }
+  }
+
+  function toggleAudio(i, videoId) {
+    const btn = document.getElementById('ytbtn-' + i);
+    const label = document.getElementById('ytlabel-' + i);
+
+    // Player already exists for this FAQ — just toggle play/pause
+    if (ytPlayers[i]) {
+      const state = ytPlayers[i].getPlayerState();
+      if (state === YT.PlayerState.PLAYING) {
+        ytPlayers[i].pauseVideo();
+        setBtnPaused(i);
+      } else {
+        stopAllExcept(i);
+        ytPlayers[i].playVideo();
+        setBtnPlaying(i);
+      }
+      return;
+    }
+
+    // No player yet — stop others, then create (audio only: 0x0 iframe)
+    stopAllExcept(i);
+    label.textContent = 'ஏற்றுகிறது...';
+
+    if (!ytApiReady) {
+      pendingPlay = { i, videoId };
+      return;
+    }
+    createAndPlay(i, videoId);
+  }
+
+  function createAndPlay(i, videoId) {
+    ytPlayers[i] = new YT.Player('ytplayer-' + i, {
+      height: '0',
+      width: '0',
+      videoId: videoId,
+      playerVars: { autoplay: 1, playsinline: 1 },
+      events: {
+        onReady: (e) => {
+          e.target.playVideo();
+          setBtnPlaying(i);
+        },
+        onStateChange: (e) => {
+          if (e.data === YT.PlayerState.PLAYING) setBtnPlaying(i);
+          if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) setBtnPaused(i);
+        }
+      }
+    });
+  }
+
+  function stopAllExcept(i) {
+    Object.keys(ytPlayers).forEach(key => {
+      if (Number(key) !== i && ytPlayers[key] && typeof ytPlayers[key].pauseVideo === 'function') {
+        ytPlayers[key].pauseVideo();
+        setBtnPaused(Number(key));
+      }
+    });
+  }
+
+  function setBtnPlaying(i) {
+    const btn = document.getElementById('ytbtn-' + i);
+    const label = document.getElementById('ytlabel-' + i);
+    if (!btn) return;
+    btn.classList.add('playing');
+    label.textContent = 'நிறுத்த';
+  }
+
+  function setBtnPaused(i) {
+    const btn = document.getElementById('ytbtn-' + i);
+    const label = document.getElementById('ytlabel-' + i);
+    if (!btn) return;
+    btn.classList.remove('playing');
+    label.textContent = 'ஒலியை கேட்க';
   }
 </script>
 
