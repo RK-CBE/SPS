@@ -459,6 +459,57 @@
     .yt-btn svg { flex-shrink: 0; }
     .yt-player-slot { width: 0; height: 0; overflow: hidden; }
 
+    .yt-seek-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      max-width: 400px;
+    }
+    .yt-seek-row input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 5px;
+      border-radius: 3px;
+      background: var(--parchment);
+      outline: none;
+      cursor: pointer;
+    }
+    .yt-seek-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--saffron);
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,.3);
+      cursor: pointer;
+    }
+    .yt-seek-row input[type="range"]::-moz-range-thumb {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--saffron);
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,.3);
+      cursor: pointer;
+    }
+    .yt-seek-row input[type="range"]::-webkit-slider-runnable-track {
+      height: 5px;
+      border-radius: 3px;
+      background: linear-gradient(to right, var(--saffron) 0%, var(--saffron) var(--fill, 0%), var(--parchment) var(--fill, 0%), var(--parchment) 100%);
+    }
+    .yt-time {
+      font-size: .78rem;
+      color: var(--ink-soft);
+      font-family: 'Tiro Tamil', serif;
+      white-space: nowrap;
+      min-width: 76px;
+      text-align: right;
+    }
+
     /* ── YOUTUBE VIDEO EMBED (native player, real views) ── */
     .yt-video-wrap {
       display: none;
@@ -637,6 +688,16 @@
              ${ytLogo} <span id="ytvideolabel-${i}">வீடியோவை காண்க</span>
            </button>
          </div>
+         <div class="yt-seek-row">
+           <input type="range" id="ytseek-${i}" min="0" max="100" value="0" step="0.1"
+             oninput="event.stopPropagation(); onSeekInput(${i}, this.value)"
+             onchange="event.stopPropagation(); onSeekChange(${i}, this.value)"
+             onmousedown="event.stopPropagation(); seekDragging[${i}] = true"
+             onmouseup="event.stopPropagation(); seekDragging[${i}] = false"
+             ontouchstart="event.stopPropagation(); seekDragging[${i}] = true"
+             ontouchend="event.stopPropagation(); seekDragging[${i}] = false" />
+           <span class="yt-time" id="yttime-${i}">0:00 / 0:00</span>
+         </div>
          <div class="yt-player-slot" id="ytaudioplayer-${i}"></div>
          <div class="yt-video-wrap" id="ytvideowrap-${i}">
            <div class="yt-video-aspect" id="ytvideoaspect-${i}"></div>
@@ -667,6 +728,8 @@
   let ytAudioPlayers = {};
   let ytApiReady = false;
   let pendingAudio = [];
+  let seekDragging = {};
+  let progressTimer = null;
 
   function onYouTubeIframeAPIReady() {
     ytApiReady = true;
@@ -730,7 +793,7 @@
         origin: window.location.origin
       },
       events: {
-        onReady: (e) => { e.target.playVideo(); },
+        onReady: (e) => { e.target.playVideo(); startProgressTimer(); },
         onStateChange: (e) => {
           if (e.data === YT.PlayerState.PLAYING) setAudioBtnPlaying(i);
           if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) setAudioBtnPaused(i);
@@ -757,6 +820,59 @@
     if (!btn) return;
     btn.classList.remove('playing');
     label.textContent = 'ஒலியை கேட்க';
+  }
+
+  // ── SEEK BAR ──
+  function formatTime(sec) {
+    if (!isFinite(sec) || sec < 0) sec = 0;
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  function startProgressTimer() {
+    if (progressTimer) return;
+    progressTimer = setInterval(() => {
+      Object.keys(ytAudioPlayers).forEach(key => {
+        const i = Number(key);
+        const player = ytAudioPlayers[i];
+        if (!player || typeof player.getCurrentTime !== 'function') return;
+        if (seekDragging[i]) return; // don't fight the user's drag
+
+        const current = player.getCurrentTime() || 0;
+        const duration = player.getDuration() || 0;
+        const slider = document.getElementById('ytseek-' + i);
+        const timeLabel = document.getElementById('yttime-' + i);
+        if (!slider || !timeLabel) return;
+
+        if (duration > 0) {
+          slider.max = duration;
+          slider.value = current;
+          const pct = (current / duration) * 100;
+          slider.style.setProperty('--fill', pct + '%');
+        }
+        timeLabel.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+      });
+    }, 400);
+  }
+
+  // Live-update the fill color while dragging (before committing the seek)
+  function onSeekInput(i, value) {
+    const slider = document.getElementById('ytseek-' + i);
+    const max = Number(slider.max) || 1;
+    const pct = (Number(value) / max) * 100;
+    slider.style.setProperty('--fill', pct + '%');
+    const timeLabel = document.getElementById('yttime-' + i);
+    if (timeLabel) timeLabel.textContent = `${formatTime(Number(value))} / ${formatTime(max)}`;
+  }
+
+  // Commit the seek once the user releases the slider
+  function onSeekChange(i, value) {
+    const player = ytAudioPlayers[i];
+    if (player && typeof player.seekTo === 'function') {
+      player.seekTo(Number(value), true);
+    }
+    seekDragging[i] = false;
   }
 
   // ── VIDEO (real, visible native player — counts as a genuine view) ──
