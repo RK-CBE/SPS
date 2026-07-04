@@ -264,6 +264,49 @@
       transition: background .2s;
     }
     .faq-item.open .faq-q .icon { background: var(--maroon); }
+
+    /* Highlight whichever FAQ is currently playing audio, even when collapsed */
+    .faq-item.playing { border-color: var(--saffron); box-shadow: 0 0 0 2px rgba(232,135,26,.25), 0 2px 10px var(--shadow); }
+    .faq-item.playing .faq-q .icon { background: var(--saffron); }
+
+    .now-playing-badge {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+      margin-left: 8px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      background: var(--saffron-pale);
+      color: var(--saffron);
+      font-size: .74rem;
+      font-weight: 700;
+      font-family: 'Philosopher', serif;
+      letter-spacing: .02em;
+      white-space: nowrap;
+    }
+    .faq-item.playing .now-playing-badge { display: inline-flex; }
+    .now-playing-badge .eq {
+      display: flex;
+      align-items: flex-end;
+      gap: 2px;
+      height: 10px;
+    }
+    .now-playing-badge .eq span {
+      display: block;
+      width: 2.5px;
+      background: var(--saffron);
+      border-radius: 1px;
+      animation: eqbounce 0.9s ease-in-out infinite;
+    }
+    .now-playing-badge .eq span:nth-child(1) { height: 40%; animation-delay: 0s; }
+    .now-playing-badge .eq span:nth-child(2) { height: 100%; animation-delay: .2s; }
+    .now-playing-badge .eq span:nth-child(3) { height: 65%; animation-delay: .4s; }
+    @keyframes eqbounce {
+      0%, 100% { transform: scaleY(.4); }
+      50% { transform: scaleY(1); }
+    }
+
     .faq-arrow {
       margin-left: auto;
       flex-shrink: 0;
@@ -663,6 +706,10 @@
       <button class="faq-q" onclick="toggleFaq(this)">
         <span class="icon">${i + 1}</span>
         <span>${item.q}</span>
+        <span class="now-playing-badge" id="nowplaying-${i}">
+          <span class="eq"><span></span><span></span><span></span></span>
+          இசைக்கிறது
+        </span>
         <span class="faq-arrow">▾</span>
       </button>
       <div class="faq-a">
@@ -752,6 +799,8 @@
     if (!btn) return;
     btn.classList.add('playing');
     label.textContent = 'நிறுத்த';
+    const item = btn.closest('.faq-item');
+    if (item) item.classList.add('playing');
   }
   function setAudioBtnPaused(i) {
     const btn = document.getElementById('ytaudiobtn-' + i);
@@ -759,6 +808,8 @@
     if (!btn) return;
     btn.classList.remove('playing');
     label.textContent = 'ஒலியை கேட்க';
+    const item = btn.closest('.faq-item');
+    if (item) item.classList.remove('playing');
   }
 
   // ── SEEK BAR ──
