@@ -412,12 +412,12 @@
     }
     footer span { color: var(--gold-light); }
 
-    /* ── YOUTUBE AUDIO BUTTON ── */
+    /* ── YOUTUBE AUDIO PLAYER ── */
+    .yt-audio-block { margin-top: 14px; max-width: 360px; }
     .yt-btn {
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      margin-top: 14px;
       padding: 7px 16px;
       background: #FF0000;
       color: #fff;
@@ -444,6 +444,56 @@
     .yt-btn.playing:hover { background: #4a0d0d; }
     .yt-btn svg { flex-shrink: 0; }
     .yt-player-slot { width: 0; height: 0; overflow: hidden; }
+
+    .yt-seek-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .yt-seek-row input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 5px;
+      border-radius: 3px;
+      background: var(--parchment);
+      outline: none;
+      cursor: pointer;
+    }
+    .yt-seek-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--saffron);
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,.3);
+      cursor: pointer;
+    }
+    .yt-seek-row input[type="range"]::-moz-range-thumb {
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--saffron);
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,.3);
+      cursor: pointer;
+    }
+    .yt-seek-row input[type="range"]::-webkit-slider-runnable-track {
+      height: 5px;
+      border-radius: 3px;
+      background: linear-gradient(to right, var(--saffron) 0%, var(--saffron) var(--fill, 0%), var(--parchment) var(--fill, 0%), var(--parchment) 100%);
+    }
+    .yt-time {
+      font-size: .78rem;
+      color: var(--ink-soft);
+      font-family: 'Tiro Tamil', serif;
+      white-space: nowrap;
+      min-width: 76px;
+      text-align: right;
+    }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
@@ -589,11 +639,23 @@
   // ── RENDER FAQ ──
   const list = document.getElementById('faq-list');
   faqs.forEach((item, i) => {
-    const ytBtn = item.ytId
-      ? `<button class="yt-btn" id="ytbtn-${i}" onclick="event.stopPropagation(); toggleAudio(${i}, '${item.ytId}')">
-           ${ytLogo} <span id="ytlabel-${i}">ஒலியை கேட்க</span>
-         </button>
-         <div class="yt-player-slot" id="ytplayer-${i}"></div>`
+    const ytBlock = item.ytId
+      ? `<div class="yt-audio-block">
+           <button class="yt-btn" id="ytaudiobtn-${i}" onclick="event.stopPropagation(); toggleAudio(${i}, '${item.ytId}')">
+             ${ytLogo} <span id="ytaudiolabel-${i}">ஒலியை கேட்க</span>
+           </button>
+           <div class="yt-seek-row">
+             <input type="range" id="ytseek-${i}" min="0" max="100" value="0" step="0.1"
+               oninput="event.stopPropagation(); onSeekInput(${i}, this.value)"
+               onchange="event.stopPropagation(); onSeekChange(${i}, this.value)"
+               onmousedown="event.stopPropagation(); seekDragging[${i}] = true"
+               onmouseup="event.stopPropagation(); seekDragging[${i}] = false"
+               ontouchstart="event.stopPropagation(); seekDragging[${i}] = true"
+               ontouchend="event.stopPropagation(); seekDragging[${i}] = false" />
+             <span class="yt-time" id="yttime-${i}">0:00 / 0:00</span>
+           </div>
+         </div>
+         <div class="yt-player-slot" id="ytaudioplayer-${i}"></div>`
       : '';
     const el = document.createElement('div');
     el.className = 'faq-item';
@@ -604,7 +666,7 @@
         <span class="faq-arrow">▾</span>
       </button>
       <div class="faq-a">
-        <div class="faq-a-inner">${item.a}${ytBtn}</div>
+        <div class="faq-a-inner">${item.a}${ytBlock}</div>
       </div>`;
     list.appendChild(el);
   });
@@ -616,93 +678,143 @@
     if (!wasOpen) item.classList.add('open');
   }
 
-  // ── YOUTUBE AUDIO-ONLY PLAYBACK ──
-  let ytPlayers = {};       // cache of created YT.Player instances, keyed by faq index
+  // ── YOUTUBE AUDIO PLAYBACK WITH SEEK BAR ──
+  let ytAudioPlayers = {};    // audio-only players, keyed by faq index
   let ytApiReady = false;
-  let pendingPlay = null;   // {i, videoId} queued until API is ready
+  let pendingActions = [];    // queued {i, videoId} until API is ready
+  let seekDragging = {};      // true while user is dragging a given seek bar
+  let progressTimer = null;   // single interval driving all progress bars
 
   function onYouTubeIframeAPIReady() {
     ytApiReady = true;
-    if (pendingPlay) {
-      const { i, videoId } = pendingPlay;
-      pendingPlay = null;
-      createAndPlay(i, videoId);
-    }
+    const queued = pendingActions;
+    pendingActions = [];
+    queued.forEach(({ i, videoId }) => createAudioPlayer(i, videoId));
+  }
+
+  function stopAllAudio(exceptIndex) {
+    Object.keys(ytAudioPlayers).forEach(key => {
+      const k = Number(key);
+      if (k !== exceptIndex && ytAudioPlayers[k] && typeof ytAudioPlayers[k].pauseVideo === 'function') {
+        ytAudioPlayers[k].pauseVideo();
+        setAudioBtnPaused(k);
+      }
+    });
   }
 
   function toggleAudio(i, videoId) {
-    const btn = document.getElementById('ytbtn-' + i);
-    const label = document.getElementById('ytlabel-' + i);
-
-    // Player already exists for this FAQ — just toggle play/pause
-    if (ytPlayers[i]) {
-      const state = ytPlayers[i].getPlayerState();
+    if (ytAudioPlayers[i]) {
+      const state = ytAudioPlayers[i].getPlayerState();
       if (state === YT.PlayerState.PLAYING) {
-        ytPlayers[i].pauseVideo();
-        setBtnPaused(i);
+        ytAudioPlayers[i].pauseVideo();
+        setAudioBtnPaused(i);
       } else {
-        stopAllExcept(i);
-        ytPlayers[i].playVideo();
-        setBtnPlaying(i);
+        stopAllAudio(i);
+        ytAudioPlayers[i].playVideo();
+        setAudioBtnPlaying(i);
       }
       return;
     }
 
-    // No player yet — stop others, then create (audio only: 0x0 iframe)
-    stopAllExcept(i);
-    label.textContent = 'ஏற்றுகிறது...';
-
+    stopAllAudio(i);
+    document.getElementById('ytaudiolabel-' + i).textContent = 'ஏற்றுகிறது...';
     if (!ytApiReady) {
-      pendingPlay = { i, videoId };
+      pendingActions.push({ i, videoId });
       return;
     }
-    createAndPlay(i, videoId);
+    createAudioPlayer(i, videoId);
   }
 
-  function createAndPlay(i, videoId) {
-    ytPlayers[i] = new YT.Player('ytplayer-' + i, {
+  function createAudioPlayer(i, videoId) {
+    ytAudioPlayers[i] = new YT.Player('ytaudioplayer-' + i, {
       height: '0',
       width: '0',
       videoId: videoId,
+      host: 'https://www.youtube-nocookie.com',
       playerVars: { autoplay: 1, playsinline: 1 },
       events: {
         onReady: (e) => {
           e.target.playVideo();
-          setBtnPlaying(i);
+          setAudioBtnPlaying(i);
+          startProgressTimer();
         },
         onStateChange: (e) => {
-          if (e.data === YT.PlayerState.PLAYING) setBtnPlaying(i);
-          if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) setBtnPaused(i);
+          if (e.data === YT.PlayerState.PLAYING) setAudioBtnPlaying(i);
+          if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) setAudioBtnPaused(i);
         }
       }
     });
   }
 
-  function stopAllExcept(i) {
-    Object.keys(ytPlayers).forEach(key => {
-      if (Number(key) !== i && ytPlayers[key] && typeof ytPlayers[key].pauseVideo === 'function') {
-        ytPlayers[key].pauseVideo();
-        setBtnPaused(Number(key));
-      }
-    });
-  }
-
-  function setBtnPlaying(i) {
-    const btn = document.getElementById('ytbtn-' + i);
-    const label = document.getElementById('ytlabel-' + i);
+  function setAudioBtnPlaying(i) {
+    const btn = document.getElementById('ytaudiobtn-' + i);
+    const label = document.getElementById('ytaudiolabel-' + i);
     if (!btn) return;
     btn.classList.add('playing');
     label.textContent = 'நிறுத்த';
   }
-
-  function setBtnPaused(i) {
-    const btn = document.getElementById('ytbtn-' + i);
-    const label = document.getElementById('ytlabel-' + i);
+  function setAudioBtnPaused(i) {
+    const btn = document.getElementById('ytaudiobtn-' + i);
+    const label = document.getElementById('ytaudiolabel-' + i);
     if (!btn) return;
     btn.classList.remove('playing');
     label.textContent = 'ஒலியை கேட்க';
   }
+
+  // ── SEEK BAR ──
+  function formatTime(sec) {
+    if (!isFinite(sec) || sec < 0) sec = 0;
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  function startProgressTimer() {
+    if (progressTimer) return;
+    progressTimer = setInterval(() => {
+      Object.keys(ytAudioPlayers).forEach(key => {
+        const i = Number(key);
+        const player = ytAudioPlayers[i];
+        if (!player || typeof player.getCurrentTime !== 'function') return;
+        if (seekDragging[i]) return; // don't fight the user's drag
+
+        const current = player.getCurrentTime() || 0;
+        const duration = player.getDuration() || 0;
+        const slider = document.getElementById('ytseek-' + i);
+        const timeLabel = document.getElementById('yttime-' + i);
+        if (!slider || !timeLabel) return;
+
+        if (duration > 0) {
+          slider.max = duration;
+          slider.value = current;
+          const pct = (current / duration) * 100;
+          slider.style.setProperty('--fill', pct + '%');
+        }
+        timeLabel.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+      });
+    }, 400);
+  }
+
+  // Live-update the fill color while dragging (before committing the seek)
+  function onSeekInput(i, value) {
+    const slider = document.getElementById('ytseek-' + i);
+    const max = Number(slider.max) || 1;
+    const pct = (Number(value) / max) * 100;
+    slider.style.setProperty('--fill', pct + '%');
+    const timeLabel = document.getElementById('yttime-' + i);
+    if (timeLabel) timeLabel.textContent = `${formatTime(Number(value))} / ${formatTime(max)}`;
+  }
+
+  // Commit the seek once the user releases the slider
+  function onSeekChange(i, value) {
+    const player = ytAudioPlayers[i];
+    if (player && typeof player.seekTo === 'function') {
+      player.seekTo(Number(value), true);
+    }
+    seekDragging[i] = false;
+  }
 </script>
+
 
 </body>
 </html>
