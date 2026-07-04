@@ -727,7 +727,7 @@
              ${ytLogo} <span id="ytaudiolabel-${i}">ஒலியை கேட்க</span>
            </button>
            <button class="yt-btn video-btn" id="ytvideobtn-${i}" onclick="event.stopPropagation(); toggleVideo(${i}, '${item.ytId}')">
-             ${ytLogo} <span id="ytvideolabel-${i}">வீடியோவை காண்க</span>
+             ${ytLogo} <span id="ytvideolabel-${i}">காணொளி</span>
            </button>
          </div>
          <div class="yt-seek-row">
@@ -944,7 +944,7 @@
     const btn = document.getElementById('ytvideobtn-' + i);
     if (wrap) wrap.classList.remove('show');
     if (aspect) aspect.innerHTML = ''; // remove iframe entirely to stop playback
-    if (label) label.textContent = 'வீடியோவை காண்க';
+    if (label) label.textContent = 'காணொளி';
     if (btn) btn.classList.remove('playing');
     if (videoOpenIndex === i) videoOpenIndex = null;
   }
