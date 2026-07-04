@@ -265,48 +265,6 @@
     }
     .faq-item.open .faq-q .icon { background: var(--maroon); }
 
-    /* Highlight whichever FAQ is currently playing audio, even when collapsed */
-    .faq-item.playing { border-color: var(--saffron); box-shadow: 0 0 0 2px rgba(232,135,26,.25), 0 2px 10px var(--shadow); }
-    .faq-item.playing .faq-q .icon { background: var(--saffron); }
-
-    .now-playing-badge {
-      display: none;
-      align-items: center;
-      gap: 5px;
-      flex-shrink: 0;
-      margin-left: 8px;
-      padding: 3px 10px;
-      border-radius: 12px;
-      background: var(--saffron-pale);
-      color: var(--saffron);
-      font-size: .74rem;
-      font-weight: 700;
-      font-family: 'Philosopher', serif;
-      letter-spacing: .02em;
-      white-space: nowrap;
-    }
-    .faq-item.playing .now-playing-badge { display: inline-flex; }
-    .now-playing-badge .eq {
-      display: flex;
-      align-items: flex-end;
-      gap: 2px;
-      height: 10px;
-    }
-    .now-playing-badge .eq span {
-      display: block;
-      width: 2.5px;
-      background: var(--saffron);
-      border-radius: 1px;
-      animation: eqbounce 0.9s ease-in-out infinite;
-    }
-    .now-playing-badge .eq span:nth-child(1) { height: 40%; animation-delay: 0s; }
-    .now-playing-badge .eq span:nth-child(2) { height: 100%; animation-delay: .2s; }
-    .now-playing-badge .eq span:nth-child(3) { height: 65%; animation-delay: .4s; }
-    @keyframes eqbounce {
-      0%, 100% { transform: scaleY(.4); }
-      50% { transform: scaleY(1); }
-    }
-
     .faq-arrow {
       margin-left: auto;
       flex-shrink: 0;
@@ -322,7 +280,7 @@
       overflow: hidden;
       transition: max-height .38s cubic-bezier(.4,0,.2,1);
     }
-    .faq-item.open .faq-a { max-height: 400px; }
+    .faq-item.open .faq-a { max-height: 1400px; }
     .faq-a-inner {
       padding: 0 20px 20px 62px;
       font-size: .97rem;
@@ -455,8 +413,13 @@
     }
     footer span { color: var(--gold-light); }
 
-    /* ── YOUTUBE AUDIO PLAYER ── */
-    .yt-audio-block { margin-top: 14px; max-width: 360px; }
+    /* ── YOUTUBE AUDIO / VIDEO BUTTONS ── */
+    .yt-btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
     .yt-btn {
       display: inline-flex;
       align-items: center;
@@ -480,6 +443,14 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 14px rgba(255,0,0,.35);
     }
+    .yt-btn.video-btn {
+      background: var(--sky-blue);
+      box-shadow: 0 2px 8px rgba(74,127,165,.25);
+    }
+    .yt-btn.video-btn:hover {
+      background: #3c6a8c;
+      box-shadow: 0 4px 14px rgba(74,127,165,.35);
+    }
     .yt-btn.playing {
       background: var(--maroon);
       box-shadow: 0 2px 8px rgba(92,16,16,.35);
@@ -488,54 +459,29 @@
     .yt-btn svg { flex-shrink: 0; }
     .yt-player-slot { width: 0; height: 0; overflow: hidden; }
 
-    .yt-seek-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 10px;
+    /* ── YOUTUBE VIDEO EMBED (native player, real views) ── */
+    .yt-video-wrap {
+      display: none;
+      margin-top: 14px;
+      max-width: 400px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px var(--shadow);
+      border: 1.5px solid var(--border);
     }
-    .yt-seek-row input[type="range"] {
-      flex: 1;
-      -webkit-appearance: none;
-      appearance: none;
-      height: 5px;
-      border-radius: 3px;
-      background: var(--parchment);
-      outline: none;
-      cursor: pointer;
+    .yt-video-wrap.show { display: block; }
+    .yt-video-aspect {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 */
+      background: #000;
     }
-    .yt-seek-row input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      background: var(--saffron);
-      border: 2px solid #fff;
-      box-shadow: 0 1px 4px rgba(0,0,0,.3);
-      cursor: pointer;
-    }
-    .yt-seek-row input[type="range"]::-moz-range-thumb {
-      width: 15px;
-      height: 15px;
-      border-radius: 50%;
-      background: var(--saffron);
-      border: 2px solid #fff;
-      box-shadow: 0 1px 4px rgba(0,0,0,.3);
-      cursor: pointer;
-    }
-    .yt-seek-row input[type="range"]::-webkit-slider-runnable-track {
-      height: 5px;
-      border-radius: 3px;
-      background: linear-gradient(to right, var(--saffron) 0%, var(--saffron) var(--fill, 0%), var(--parchment) var(--fill, 0%), var(--parchment) 100%);
-    }
-    .yt-time {
-      font-size: .78rem;
-      color: var(--ink-soft);
-      font-family: 'Tiro Tamil', serif;
-      white-space: nowrap;
-      min-width: 76px;
-      text-align: right;
+    .yt-video-aspect iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
     }
 
     /* ── RESPONSIVE ── */
@@ -628,7 +574,7 @@
   <span>&copy;<script>document.write(new Date().getFullYear());</script>அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை</span>
 </footer>
 
-<!-- YouTube IFrame API -->
+<!-- YouTube IFrame API (needed for the audio-only player) -->
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <script>
@@ -683,22 +629,18 @@
   const list = document.getElementById('faq-list');
   faqs.forEach((item, i) => {
     const ytBlock = item.ytId
-      ? `<div class="yt-audio-block">
+      ? `<div class="yt-btn-row">
            <button class="yt-btn" id="ytaudiobtn-${i}" onclick="event.stopPropagation(); toggleAudio(${i}, '${item.ytId}')">
              ${ytLogo} <span id="ytaudiolabel-${i}">ஒலியை கேட்க</span>
            </button>
-           <div class="yt-seek-row">
-             <input type="range" id="ytseek-${i}" min="0" max="100" value="0" step="0.1"
-               oninput="event.stopPropagation(); onSeekInput(${i}, this.value)"
-               onchange="event.stopPropagation(); onSeekChange(${i}, this.value)"
-               onmousedown="event.stopPropagation(); seekDragging[${i}] = true"
-               onmouseup="event.stopPropagation(); seekDragging[${i}] = false"
-               ontouchstart="event.stopPropagation(); seekDragging[${i}] = true"
-               ontouchend="event.stopPropagation(); seekDragging[${i}] = false" />
-             <span class="yt-time" id="yttime-${i}">0:00 / 0:00</span>
-           </div>
+           <button class="yt-btn video-btn" id="ytvideobtn-${i}" onclick="event.stopPropagation(); toggleVideo(${i}, '${item.ytId}')">
+             ${ytLogo} <span id="ytvideolabel-${i}">வீடியோவை காண்க</span>
+           </button>
          </div>
-         <div class="yt-player-slot" id="ytaudioplayer-${i}"></div>`
+         <div class="yt-player-slot" id="ytaudioplayer-${i}"></div>
+         <div class="yt-video-wrap" id="ytvideowrap-${i}">
+           <div class="yt-video-aspect" id="ytvideoaspect-${i}"></div>
+         </div>`
       : '';
     const el = document.createElement('div');
     el.className = 'faq-item';
@@ -706,10 +648,6 @@
       <button class="faq-q" onclick="toggleFaq(this)">
         <span class="icon">${i + 1}</span>
         <span>${item.q}</span>
-        <span class="now-playing-badge" id="nowplaying-${i}">
-          <span class="eq"><span></span><span></span><span></span></span>
-          இசைக்கிறது
-        </span>
         <span class="faq-arrow">▾</span>
       </button>
       <div class="faq-a">
@@ -725,17 +663,15 @@
     if (!wasOpen) item.classList.add('open');
   }
 
-  // ── YOUTUBE AUDIO PLAYBACK WITH SEEK BAR ──
-  let ytAudioPlayers = {};    // audio-only players, keyed by faq index
+  // ── AUDIO (hidden JS-API player, background listening) ──
+  let ytAudioPlayers = {};
   let ytApiReady = false;
-  let pendingActions = [];    // queued {i, videoId} until API is ready
-  let seekDragging = {};      // true while user is dragging a given seek bar
-  let progressTimer = null;   // single interval driving all progress bars
+  let pendingAudio = [];
 
   function onYouTubeIframeAPIReady() {
     ytApiReady = true;
-    const queued = pendingActions;
-    pendingActions = [];
+    const queued = pendingAudio;
+    pendingAudio = [];
     queued.forEach(({ i, videoId }) => createAudioPlayer(i, videoId));
   }
 
@@ -750,6 +686,9 @@
   }
 
   function toggleAudio(i, videoId) {
+    // Starting audio should stop any visible video (own or others')
+    stopAllVideo(-1);
+
     if (ytAudioPlayers[i]) {
       const state = ytAudioPlayers[i].getPlayerState();
       if (state === YT.PlayerState.PLAYING) {
@@ -758,7 +697,6 @@
       } else {
         stopAllAudio(i);
         ytAudioPlayers[i].playVideo();
-        setAudioBtnPlaying(i);
       }
       return;
     }
@@ -766,9 +704,7 @@
     stopAllAudio(i);
     document.getElementById('ytaudiolabel-' + i).textContent = 'ஏற்றுகிறது...';
     if (!ytApiReady) {
-      pendingActions.push({ i, videoId });
-      // If the YouTube API script itself is blocked (ad-blocker / network),
-      // don't leave the button stuck on "Loading..." forever.
+      pendingAudio.push({ i, videoId });
       setTimeout(() => {
         if (!ytApiReady) {
           const label = document.getElementById('ytaudiolabel-' + i);
@@ -794,17 +730,12 @@
         origin: window.location.origin
       },
       events: {
-        onReady: (e) => {
-          e.target.playVideo();
-          startProgressTimer();
-          // Badge/button state is driven entirely by onStateChange below —
-          // we don't guess or force anything here.
-        },
+        onReady: (e) => { e.target.playVideo(); },
         onStateChange: (e) => {
           if (e.data === YT.PlayerState.PLAYING) setAudioBtnPlaying(i);
           if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) setAudioBtnPaused(i);
         },
-        onError: (e) => {
+        onError: () => {
           const label = document.getElementById('ytaudiolabel-' + i);
           if (label) label.textContent = 'இயங்கவில்லை, மீண்டும் முயற்சிக்கவும்';
           setAudioBtnPaused(i);
@@ -819,8 +750,6 @@
     if (!btn) return;
     btn.classList.add('playing');
     label.textContent = 'நிறுத்த';
-    const item = btn.closest('.faq-item');
-    if (item) item.classList.add('playing');
   }
   function setAudioBtnPaused(i) {
     const btn = document.getElementById('ytaudiobtn-' + i);
@@ -828,61 +757,56 @@
     if (!btn) return;
     btn.classList.remove('playing');
     label.textContent = 'ஒலியை கேட்க';
-    const item = btn.closest('.faq-item');
-    if (item) item.classList.remove('playing');
   }
 
-  // ── SEEK BAR ──
-  function formatTime(sec) {
-    if (!isFinite(sec) || sec < 0) sec = 0;
-    const m = Math.floor(sec / 60);
-    const s = Math.floor(sec % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-  }
+  // ── VIDEO (real, visible native player — counts as a genuine view) ──
+  let videoOpenIndex = null; // which faq currently has its video iframe shown
 
-  function startProgressTimer() {
-    if (progressTimer) return;
-    progressTimer = setInterval(() => {
-      Object.keys(ytAudioPlayers).forEach(key => {
-        const i = Number(key);
-        const player = ytAudioPlayers[i];
-        if (!player || typeof player.getCurrentTime !== 'function') return;
-        if (seekDragging[i]) return; // don't fight the user's drag
-
-        const current = player.getCurrentTime() || 0;
-        const duration = player.getDuration() || 0;
-        const slider = document.getElementById('ytseek-' + i);
-        const timeLabel = document.getElementById('yttime-' + i);
-        if (!slider || !timeLabel) return;
-
-        if (duration > 0) {
-          slider.max = duration;
-          slider.value = current;
-          const pct = (current / duration) * 100;
-          slider.style.setProperty('--fill', pct + '%');
-        }
-        timeLabel.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
-      });
-    }, 400);
-  }
-
-  // Live-update the fill color while dragging (before committing the seek)
-  function onSeekInput(i, value) {
-    const slider = document.getElementById('ytseek-' + i);
-    const max = Number(slider.max) || 1;
-    const pct = (Number(value) / max) * 100;
-    slider.style.setProperty('--fill', pct + '%');
-    const timeLabel = document.getElementById('yttime-' + i);
-    if (timeLabel) timeLabel.textContent = `${formatTime(Number(value))} / ${formatTime(max)}`;
-  }
-
-  // Commit the seek once the user releases the slider
-  function onSeekChange(i, value) {
-    const player = ytAudioPlayers[i];
-    if (player && typeof player.seekTo === 'function') {
-      player.seekTo(Number(value), true);
+  function stopAllVideo(exceptIndex) {
+    if (videoOpenIndex !== null && videoOpenIndex !== exceptIndex) {
+      hideVideo(videoOpenIndex);
     }
-    seekDragging[i] = false;
+  }
+
+  function hideVideo(i) {
+    const wrap = document.getElementById('ytvideowrap-' + i);
+    const aspect = document.getElementById('ytvideoaspect-' + i);
+    const label = document.getElementById('ytvideolabel-' + i);
+    const btn = document.getElementById('ytvideobtn-' + i);
+    if (wrap) wrap.classList.remove('show');
+    if (aspect) aspect.innerHTML = ''; // remove iframe entirely to stop playback
+    if (label) label.textContent = 'வீடியோவை காண்க';
+    if (btn) btn.classList.remove('playing');
+    if (videoOpenIndex === i) videoOpenIndex = null;
+  }
+
+  function toggleVideo(i, videoId) {
+    // Opening a video should stop any playing audio
+    stopAllAudio(-1);
+
+    if (videoOpenIndex === i) {
+      hideVideo(i);
+      return;
+    }
+
+    stopAllVideo(i);
+
+    const wrap = document.getElementById('ytvideowrap-' + i);
+    const aspect = document.getElementById('ytvideoaspect-' + i);
+    const label = document.getElementById('ytvideolabel-' + i);
+    const btn = document.getElementById('ytvideobtn-' + i);
+
+    aspect.innerHTML = `<iframe
+        src="https://www.youtube-nocookie.com/embed/${videoId}?rel=0"
+        title="YouTube video player"
+        allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen>
+      </iframe>`;
+    wrap.classList.add('show');
+    label.textContent = 'மறை';
+    btn.classList.add('playing');
+    videoOpenIndex = i;
   }
 </script>
 
