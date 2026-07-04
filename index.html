@@ -767,6 +767,16 @@
     document.getElementById('ytaudiolabel-' + i).textContent = 'ஏற்றுகிறது...';
     if (!ytApiReady) {
       pendingActions.push({ i, videoId });
+      // If the YouTube API script itself is blocked (ad-blocker / network),
+      // don't leave the button stuck on "Loading..." forever.
+      setTimeout(() => {
+        if (!ytApiReady) {
+          const label = document.getElementById('ytaudiolabel-' + i);
+          if (label && label.textContent === 'ஏற்றுகிறது...') {
+            label.textContent = 'ஏற்ற முடியவில்லை, மீண்டும் முயற்சிக்கவும்';
+          }
+        }
+      }, 6000);
       return;
     }
     createAudioPlayer(i, videoId);
@@ -778,7 +788,11 @@
       width: '0',
       videoId: videoId,
       host: 'https://www.youtube-nocookie.com',
-      playerVars: { autoplay: 1, playsinline: 1 },
+      playerVars: {
+        autoplay: 1,
+        playsinline: 1,
+        origin: window.location.origin
+      },
       events: {
         onReady: (e) => {
           e.target.playVideo();
@@ -788,6 +802,11 @@
         onStateChange: (e) => {
           if (e.data === YT.PlayerState.PLAYING) setAudioBtnPlaying(i);
           if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) setAudioBtnPaused(i);
+        },
+        onError: (e) => {
+          const label = document.getElementById('ytaudiolabel-' + i);
+          if (label) label.textContent = 'இயங்கவில்லை, மீண்டும் முயற்சிக்கவும்';
+          setAudioBtnPaused(i);
         }
       }
     });
