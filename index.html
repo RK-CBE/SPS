@@ -412,12 +412,17 @@
     }
     footer span { color: var(--gold-light); }
 
-    /* ── YOUTUBE AUDIO BUTTON ── */
+    /* ── YOUTUBE AUDIO / VIDEO BUTTONS ── */
+    .yt-btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
     .yt-btn {
       display: inline-flex;
       align-items: center;
       gap: 7px;
-      margin-top: 14px;
       padding: 7px 16px;
       background: #FF0000;
       color: #fff;
@@ -437,6 +442,14 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 14px rgba(255,0,0,.35);
     }
+    .yt-btn.video-btn {
+      background: var(--sky-blue);
+      box-shadow: 0 2px 8px rgba(74,127,165,.25);
+    }
+    .yt-btn.video-btn:hover {
+      background: #3c6a8c;
+      box-shadow: 0 4px 14px rgba(74,127,165,.35);
+    }
     .yt-btn.playing {
       background: var(--maroon);
       box-shadow: 0 2px 8px rgba(92,16,16,.35);
@@ -444,6 +457,30 @@
     .yt-btn.playing:hover { background: #4a0d0d; }
     .yt-btn svg { flex-shrink: 0; }
     .yt-player-slot { width: 0; height: 0; overflow: hidden; }
+
+    .yt-video-wrap {
+      max-width: 100%;
+      width: 360px;
+      margin-top: 14px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px var(--shadow);
+      border: 1.5px solid var(--border);
+      display: none;
+    }
+    .yt-video-wrap.show { display: block; }
+    .yt-video-wrap .yt-video-inner {
+      position: relative;
+      width: 100%;
+      padding-top: 56.25%; /* 16:9 */
+    }
+    .yt-video-wrap .yt-video-inner > div,
+    .yt-video-wrap .yt-video-inner iframe {
+      position: absolute;
+      inset: 0;
+      width: 100% !important;
+      height: 100% !important;
+    }
 
     /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
@@ -589,11 +626,19 @@
   // ── RENDER FAQ ──
   const list = document.getElementById('faq-list');
   faqs.forEach((item, i) => {
-    const ytBtn = item.ytId
-      ? `<button class="yt-btn" id="ytbtn-${i}" onclick="event.stopPropagation(); toggleAudio(${i}, '${item.ytId}')">
-           ${ytLogo} <span id="ytlabel-${i}">ஒலியை கேட்க</span>
-         </button>
-         <div class="yt-player-slot" id="ytplayer-${i}"></div>`
+    const ytBlock = item.ytId
+      ? `<div class="yt-btn-row">
+           <button class="yt-btn audio-btn" id="ytaudiobtn-${i}" onclick="event.stopPropagation(); toggleAudio(${i}, '${item.ytId}')">
+             ${ytLogo} <span id="ytaudiolabel-${i}">ஒலியை கேட்க</span>
+           </button>
+           <button class="yt-btn video-btn" id="ytvideobtn-${i}" onclick="event.stopPropagation(); toggleVideo(${i}, '${item.ytId}')">
+             ${ytLogo} <span id="ytvideolabel-${i}">வீடியோவை காண்க</span>
+           </button>
+         </div>
+         <div class="yt-player-slot" id="ytaudioplayer-${i}"></div>
+         <div class="yt-video-wrap" id="ytvideowrap-${i}">
+           <div class="yt-video-inner" id="ytvideoplayer-${i}"></div>
+         </div>`
       : '';
     const el = document.createElement('div');
     el.className = 'faq-item';
@@ -604,7 +649,7 @@
         <span class="faq-arrow">▾</span>
       </button>
       <div class="faq-a">
-        <div class="faq-a-inner">${item.a}${ytBtn}</div>
+        <div class="faq-a-inner">${item.a}${ytBlock}</div>
       </div>`;
     list.appendChild(el);
   });
@@ -616,92 +661,171 @@
     if (!wasOpen) item.classList.add('open');
   }
 
-  // ── YOUTUBE AUDIO-ONLY PLAYBACK ──
-  let ytPlayers = {};       // cache of created YT.Player instances, keyed by faq index
+  // ── YOUTUBE AUDIO / VIDEO PLAYBACK ──
+  let ytAudioPlayers = {};   // audio-only players, keyed by faq index
+  let ytVideoPlayers = {};   // visible inline video players, keyed by faq index
   let ytApiReady = false;
-  let pendingPlay = null;   // {i, videoId} queued until API is ready
+  let pendingActions = [];   // queued {type, i, videoId} until API is ready
 
   function onYouTubeIframeAPIReady() {
     ytApiReady = true;
-    if (pendingPlay) {
-      const { i, videoId } = pendingPlay;
-      pendingPlay = null;
-      createAndPlay(i, videoId);
-    }
+    const queued = pendingActions;
+    pendingActions = [];
+    queued.forEach(({ type, i, videoId }) => {
+      if (type === 'audio') createAudioPlayer(i, videoId);
+      if (type === 'video') createVideoPlayer(i, videoId);
+    });
   }
 
-  function toggleAudio(i, videoId) {
-    const btn = document.getElementById('ytbtn-' + i);
-    const label = document.getElementById('ytlabel-' + i);
+  function stopAllAudio(exceptIndex) {
+    Object.keys(ytAudioPlayers).forEach(key => {
+      const k = Number(key);
+      if (k !== exceptIndex && ytAudioPlayers[k] && typeof ytAudioPlayers[k].pauseVideo === 'function') {
+        ytAudioPlayers[k].pauseVideo();
+        setAudioBtnPaused(k);
+      }
+    });
+  }
 
-    // Player already exists for this FAQ — just toggle play/pause
-    if (ytPlayers[i]) {
-      const state = ytPlayers[i].getPlayerState();
+  function stopAllVideo(exceptIndex) {
+    Object.keys(ytVideoPlayers).forEach(key => {
+      const k = Number(key);
+      if (k !== exceptIndex && ytVideoPlayers[k] && typeof ytVideoPlayers[k].pauseVideo === 'function') {
+        ytVideoPlayers[k].pauseVideo();
+        setVideoBtnPaused(k);
+        document.getElementById('ytvideowrap-' + k).classList.remove('show');
+      }
+    });
+  }
+
+  // ── AUDIO ──
+  function toggleAudio(i, videoId) {
+    // playing video for this same FAQ should stop first
+    if (ytVideoPlayers[i]) {
+      ytVideoPlayers[i].pauseVideo();
+      setVideoBtnPaused(i);
+      document.getElementById('ytvideowrap-' + i).classList.remove('show');
+    }
+    stopAllVideo(i);
+
+    if (ytAudioPlayers[i]) {
+      const state = ytAudioPlayers[i].getPlayerState();
       if (state === YT.PlayerState.PLAYING) {
-        ytPlayers[i].pauseVideo();
-        setBtnPaused(i);
+        ytAudioPlayers[i].pauseVideo();
+        setAudioBtnPaused(i);
       } else {
-        stopAllExcept(i);
-        ytPlayers[i].playVideo();
-        setBtnPlaying(i);
+        stopAllAudio(i);
+        ytAudioPlayers[i].playVideo();
+        setAudioBtnPlaying(i);
       }
       return;
     }
 
-    // No player yet — stop others, then create (audio only: 0x0 iframe)
-    stopAllExcept(i);
-    label.textContent = 'ஏற்றுகிறது...';
-
+    stopAllAudio(i);
+    document.getElementById('ytaudiolabel-' + i).textContent = 'ஏற்றுகிறது...';
     if (!ytApiReady) {
-      pendingPlay = { i, videoId };
+      pendingActions.push({ type: 'audio', i, videoId });
       return;
     }
-    createAndPlay(i, videoId);
+    createAudioPlayer(i, videoId);
   }
 
-  function createAndPlay(i, videoId) {
-    ytPlayers[i] = new YT.Player('ytplayer-' + i, {
+  function createAudioPlayer(i, videoId) {
+    ytAudioPlayers[i] = new YT.Player('ytaudioplayer-' + i, {
       height: '0',
       width: '0',
       videoId: videoId,
       playerVars: { autoplay: 1, playsinline: 1 },
       events: {
-        onReady: (e) => {
-          e.target.playVideo();
-          setBtnPlaying(i);
-        },
+        onReady: (e) => { e.target.playVideo(); setAudioBtnPlaying(i); },
         onStateChange: (e) => {
-          if (e.data === YT.PlayerState.PLAYING) setBtnPlaying(i);
-          if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) setBtnPaused(i);
+          if (e.data === YT.PlayerState.PLAYING) setAudioBtnPlaying(i);
+          if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) setAudioBtnPaused(i);
         }
       }
     });
   }
 
-  function stopAllExcept(i) {
-    Object.keys(ytPlayers).forEach(key => {
-      if (Number(key) !== i && ytPlayers[key] && typeof ytPlayers[key].pauseVideo === 'function') {
-        ytPlayers[key].pauseVideo();
-        setBtnPaused(Number(key));
-      }
-    });
-  }
-
-  function setBtnPlaying(i) {
-    const btn = document.getElementById('ytbtn-' + i);
-    const label = document.getElementById('ytlabel-' + i);
+  function setAudioBtnPlaying(i) {
+    const btn = document.getElementById('ytaudiobtn-' + i);
+    const label = document.getElementById('ytaudiolabel-' + i);
     if (!btn) return;
     btn.classList.add('playing');
     label.textContent = 'நிறுத்த';
   }
-
-  function setBtnPaused(i) {
-    const btn = document.getElementById('ytbtn-' + i);
-    const label = document.getElementById('ytlabel-' + i);
+  function setAudioBtnPaused(i) {
+    const btn = document.getElementById('ytaudiobtn-' + i);
+    const label = document.getElementById('ytaudiolabel-' + i);
     if (!btn) return;
     btn.classList.remove('playing');
     label.textContent = 'ஒலியை கேட்க';
   }
+
+  // ── VIDEO (inline, visible) ──
+  function toggleVideo(i, videoId) {
+    // playing audio for this same FAQ should stop first
+    if (ytAudioPlayers[i]) {
+      ytAudioPlayers[i].pauseVideo();
+      setAudioBtnPaused(i);
+    }
+    stopAllAudio(i);
+
+    const wrap = document.getElementById('ytvideowrap-' + i);
+
+    if (ytVideoPlayers[i]) {
+      const state = ytVideoPlayers[i].getPlayerState();
+      if (state === YT.PlayerState.PLAYING) {
+        ytVideoPlayers[i].pauseVideo();
+        setVideoBtnPaused(i);
+        wrap.classList.remove('show');
+      } else {
+        stopAllVideo(i);
+        wrap.classList.add('show');
+        ytVideoPlayers[i].playVideo();
+        setVideoBtnPlaying(i);
+      }
+      return;
+    }
+
+    stopAllVideo(i);
+    wrap.classList.add('show');
+    document.getElementById('ytvideolabel-' + i).textContent = 'ஏற்றுகிறது...';
+    if (!ytApiReady) {
+      pendingActions.push({ type: 'video', i, videoId });
+      return;
+    }
+    createVideoPlayer(i, videoId);
+  }
+
+  function createVideoPlayer(i, videoId) {
+    ytVideoPlayers[i] = new YT.Player('ytvideoplayer-' + i, {
+      videoId: videoId,
+      playerVars: { autoplay: 1, playsinline: 1 },
+      events: {
+        onReady: (e) => { e.target.playVideo(); setVideoBtnPlaying(i); },
+        onStateChange: (e) => {
+          if (e.data === YT.PlayerState.PLAYING) setVideoBtnPlaying(i);
+          if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) setVideoBtnPaused(i);
+        }
+      }
+    });
+  }
+
+  function setVideoBtnPlaying(i) {
+    const btn = document.getElementById('ytvideobtn-' + i);
+    const label = document.getElementById('ytvideolabel-' + i);
+    if (!btn) return;
+    btn.classList.add('playing');
+    label.textContent = 'நிறுத்த';
+  }
+  function setVideoBtnPaused(i) {
+    const btn = document.getElementById('ytvideobtn-' + i);
+    const label = document.getElementById('ytvideolabel-' + i);
+    if (!btn) return;
+    btn.classList.remove('playing');
+    label.textContent = 'வீடியோவை காண்க';
+  }
+
 </script>
 
 </body>
