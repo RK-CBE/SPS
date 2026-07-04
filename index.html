@@ -796,8 +796,9 @@
       events: {
         onReady: (e) => {
           e.target.playVideo();
-          setAudioBtnPlaying(i);
           startProgressTimer();
+          // Badge/button state is driven entirely by onStateChange below —
+          // we don't guess or force anything here.
         },
         onStateChange: (e) => {
           if (e.data === YT.PlayerState.PLAYING) setAudioBtnPlaying(i);
