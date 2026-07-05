@@ -2880,7 +2880,26 @@
         origin: window.location.origin
       },
       events: {
-        onReady: (e) => { e.target.playVideo(); startProgressTimer(); },
+        onReady: (e) => {
+          e.target.playVideo();
+          startProgressTimer();
+          // Some browsers silently block this automatic play attempt since
+          // it happens after the player finishes loading over the network
+          // (breaking the direct link to the original click). If that
+          // happens, don't leave the button stuck on "Loading..." forever —
+          // wait a generous amount of time (long enough to rule out normal
+          // buffering) and, only if still not playing, reset the button so
+          // the user's next click is a fresh direct gesture. A direct click
+          // reliably bypasses autoplay blocking; we do NOT call playVideo()
+          // here ourselves, to avoid interrupting genuine slow buffering.
+          setTimeout(() => {
+            const state = e.target.getPlayerState();
+            const stillNotPlaying = state !== YT.PlayerState.PLAYING && state !== YT.PlayerState.BUFFERING;
+            if (stillNotPlaying) {
+              setAudioBtnPaused(i);
+            }
+          }, 4000);
+        },
         onStateChange: (e) => {
           if (e.data === YT.PlayerState.PLAYING) setAudioBtnPlaying(i);
           if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) setAudioBtnPaused(i);
